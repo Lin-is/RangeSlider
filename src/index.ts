@@ -54,7 +54,7 @@ class InterfaceElement {
 
     // eslint-disable-next-line class-methods-use-this
     createElement(tag: string, className: string, idNum: number | string): Element {
-      if (tag && className) {
+      if (!(tag && className)) {
         return null;
       }
       const newElem = document.createElement(tag);
@@ -488,7 +488,7 @@ class Toggle extends InterfaceElement {
       const that = this;
       const toggle = this.container;
 
-      toggle.addEventListener('mousedown', (event: MouseEvent) => {
+      function onDown (event: MouseEvent | TouchEvent) {
         let shift: number;
         let newCoord: number;
         let eventClient: number;
@@ -497,16 +497,32 @@ class Toggle extends InterfaceElement {
         event.preventDefault();
 
         if (that.info.isVertical) {
-          shift = event.clientY - toggle.getBoundingClientRect().top;
+          if (event instanceof MouseEvent) {
+            shift = event.clientY - toggle.getBoundingClientRect().top;
+          } else {
+            shift = event.targetTouches[0].clientY - toggle.getBoundingClientRect().top;
+          }
         } else {
-          shift = event.clientX - toggle.getBoundingClientRect().left;
+          if (event instanceof MouseEvent) {
+            shift = event.clientX - toggle.getBoundingClientRect().left;
+          } else {
+            shift = event.targetTouches[0].clientX - toggle.getBoundingClientRect().left;
+          }
         }
 
-        function onMouseMove(e: MouseEvent) {
+        function onMouseMove(e: MouseEvent | TouchEvent) {
           if (that.info.isVertical) {
-            eventClient = e.clientY;
+            if (e instanceof MouseEvent) {
+              eventClient = e.clientY;
+            } else {
+              eventClient = e.targetTouches[0].clientY;
+            }
           } else {
-            eventClient = e.clientX;
+            if (e instanceof MouseEvent) {
+              eventClient = e.clientX;
+            } else {
+              eventClient = e.targetTouches[0].clientX;
+            }
           }
 
           newCoord = eventClient - shift - that.dragAndDropInfo.trackStart;
@@ -536,15 +552,22 @@ class Toggle extends InterfaceElement {
 
         function onMouseUp() {
           document.removeEventListener('mouseup', onMouseUp);
+          document.removeEventListener('touchend', onMouseUp);
           document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('touchmove', onMouseMove);
           that.sendMessage(msg);
         }
 
         document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('touchmove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
-      });
+        document.addEventListener('touchend', onMouseUp);
+      };
+      toggle.addEventListener('mousedown', onDown);
+      toggle.addEventListener('touchstart', onDown);
       this.container.addEventListener('ondragstart', () => false);
     }
+
 }
 
 //*--------------------------------------------------------------------------------------------
@@ -552,6 +575,8 @@ class Toggle extends InterfaceElement {
 //*--------------------------------------------------------------------------------------------
 
 class Scale extends InterfaceElement {
+    container: HTMLElement;
+
     track: HTMLElement;
 
     scale: HTMLElement;
@@ -594,12 +619,15 @@ class Scale extends InterfaceElement {
 
     renderFirstStage() { // add track container and track
       this.container = this.createElement('div', 'slider__trackContainer', this.info.idNum) as HTMLElement;
+      console.log(this.container);
       this.track = (this.createElement('div', 'slider__track', this.info.idNum)) as HTMLElement;
       if (this.info.isVertical) {
         this.container.classList.add('vertical');
         this.track.classList.add('vertical');
       }
+      
       this.container.append(this.track);
+      
     }
 
     renderSecStage() { // add toggles, set toggles first positions
@@ -663,7 +691,7 @@ class Scale extends InterfaceElement {
     }
 
     updateScaleLabels(toRemoveAdditText = false) {
-      const divs = this.scale.children;
+      const divs = Array.from(this.scale.children);
       for (const division of divs) {
         const htmlDiv = division as HTMLElement;
         if (division.children.length > 0) {
@@ -1488,7 +1516,7 @@ class View {
 
     scaleObserver: Observer;
 
-    constructor(info: sliderInfo, parentElement: Element) {
+    constructor(info: sliderInfo, parentElement: HTMLElement) {
       this.info = info;
       this.observers = [];
       this.scale = new Scale(this.info);
@@ -1508,14 +1536,22 @@ class View {
       window.addEventListener('resize', this.changeWindowSizeListener.bind(this));
     }
 
-    render(parentElement: Element) {
-      this.container = document.createElement('div');
+    render(parentElement: HTMLElement) {
+      console.log(parentElement)
+      if (!parentElement) {
+        this.container = document.createElement('div');
+      } else {
+        this.container = parentElement;
+      }
+
+      console.log(this.container);
+      
       this.container.classList.add('slider__mainContainer');
       this.container.setAttribute('id', `slider__mainContainer-${this.info.idNum}`);
 
       this.container.append(this.scale.container);
       this.container.append(this.controlPanel.container);
-      parentElement.append(this.container);
+      // parentElement.append(this.container);
     }
 
     addListeners() {
@@ -1546,7 +1582,7 @@ class View {
     }
 
     scaleDivsAddListeners() {
-      const scaleDivs = this.scale.scale.children;
+      const scaleDivs = Array.from(this.scale.scale.children);
       for (const div of scaleDivs) {
         div.addEventListener('click', this.scaleDivClickListener.bind(this));
       }
@@ -1842,12 +1878,12 @@ class Controller {
     }
 }
 
-function createSlider(info: sliderInfo, parentElement: Element) {
+function createSlider(info: sliderInfo, parentElement: HTMLElement) {
   const app = new Controller(new Model(info), new View(info, parentElement));
   console.log(app);
 }
 
-const container = document.querySelector('.slider-here');
+const container = document.querySelector('.slider-here') as HTMLElement;
 
 createSlider({
   idNum: 1,

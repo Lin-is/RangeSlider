@@ -1,45 +1,65 @@
-// // import { Observable } from '../src/index'  //++++++
-// // import { Observer } from '../src/index'
-// // import { Model } from '../src/index'       //++++++
-// // import { Controller } from '../src/index'
-// // import { View } from '../src/index'
-// // import { SliderInterface } from '../src/index'
+describe ('Observable', () => {     //!100%
+    beforeEach(function() {
+        const fixture = '<div id="fixture"></div>';
+        console.log(fixture);
+    
+        document.body.insertAdjacentHTML(
+          'afterbegin', 
+        fixture);
 
+        let info = {
+            idNum: 1,
+            minValue: 0,
+            maxValue: 100,
+            step: '5',
+            isRange: false,
+            togVals: [25],
+            valType: 'integer',
+            isVertical: false,
+            smDivNum: 5,
+            lDivNum: 4,
+          }
 
+        const container = document.body.querySelector('#fixture');
+        createSlider(info, container);
 
+        console.log(container);
+    });
 
-// describe ('Observable', () => {     //!100%
+    afterEach(function() {
+        document.body.removeChild(document.getElementById('fixture'));
+    });
 
-//     let observable: Observable;
+    let observable: Observable;
 
-//     beforeEach (function () {
-//         observable = new Observable();
-//     });  
+    beforeEach (function () {
+        observable = new observable();
+    });  
 
-//     it('can create', () => {
-//         expect(observable).not.toBe(null);
-//         expect(observable.observers).toEqual([]);
-//     });
+    it('can create', () => {
+        expect(observable).not.toBe(null);
+        expect(observable.observers).toEqual([]);
+    });
 
-//     it('can add observer to array of observers', () => {
-//         let testObserver = jasmine.createSpyObj('testObserver', ['notify', 'constructor']);
+    // it('can add observer to array of observers', () => {
+    //     let testObserver = jasmine.createSpyObj('testObserver', ['notify', 'constructor']);
 
-//         observable.addObserver(testObserver);
+    //     observable.addObserver(testObserver);
 
-//         expect(observable.observers.includes(testObserver)).toEqual(true);
-//     });
+    //     expect(observable.observers.includes(testObserver)).toEqual(true);
+    // });
 
-//     it('observable can send message to observers', () => {
-//         let testObserver = jasmine.createSpyObj('testObserver', ['notify', 'constructor']);
-//         for (let i = 0; i < 10; i++) {
-//             observable.addObserver(testObserver);
-//         }
+    // it('observable can send message to observers', () => {
+    //     let testObserver = jasmine.createSpyObj('testObserver', ['notify', 'constructor']);
+    //     for (let i = 0; i < 10; i++) {
+    //         observable.addObserver(testObserver);
+    //     }
 
-//         observable.sendMessage("msg");
+    //     observable.sendMessage("msg");
 
-//         expect(testObserver.notify.calls.count()).toEqual(observable.observers.length);
-//     });
-// });
+    //     expect(testObserver.notify.calls.count()).toEqual(observable.observers.length);
+    // });
+});
 
 
 // describe ('Observer', () => {      //! < 100%
@@ -47,7 +67,6 @@
 //     it('can create', () => {
 //         const observer: Observer = new Observer(console.log(testMsg));
 //         expect(observer).not.toBe(null);
-//         expect(observer.notify).not.toBeUndefined;
 //     })
 // });
 
@@ -260,7 +279,7 @@
 //             let idNum = 1;
 //             controller.changeHandleNumberValue(idNum, newNumber);
 //             expect(controller.model.setHandleNumberValue).toHaveBeenCalledWith(idNum, newNumber);
-//         });
+//         });npm
 //     });
 // });
 
@@ -316,18 +335,4 @@
 
 // });
 
-
-
-// describe('SliderInterface', () => {
-//     it('can create', () => {
-//         let info = {
-//             idNum: 1,
-//             min: 9,
-//             max: 112,
-//             hanNum: 1
-//         }
-//         const inter: SliderInterface = new SliderInterface(info);
-//         expect(inter).not.toBe(null);
-//     });
-// });
 

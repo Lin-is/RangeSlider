@@ -21,19 +21,18 @@ const webpackBaseConfig = require('./build/webpack.base.conf')
 module.exports = function (config) {
     config.set({
         basePath: '',
-        frameworks: ['jasmine-jquery', 'jasmine'],
+        frameworks: ["mocha", "chai", "sinon"],
         files: ['test/*.ts'],
         exclude: [],
         preprocessors: {
             './test/*.ts': ['webpack'],
+            'src/*.ts': ['coverage']
         },
         webpack: {
             module: webpackBaseConfig.module,
             resolve: webpackBaseConfig.resolve,
-            mode: webpackDevConfig.mode,
-            devtool: webpackDevConfig.devtool,
         },
-        reporters: ['spec', 'coverage-istanbul'],
+        reporters: ['progress', 'coverage'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
@@ -41,22 +40,9 @@ module.exports = function (config) {
         browsers: ['Chrome'],
         singleRun: false,
         concurrency: Infinity,
-        client: {
-            jasmine: {
-                random: false
-            }
-        },
-        coverageIstanbulReporter: {
-            reports: ['text-summary'],
-            dir: path.join(__dirname, 'coverage'),
-            combineBrowserReports: true,
-            fixWebpackSourcePaths: true,
-            skipFilesWithNoCoverage: false,
-            'report-config': {
-                html: {
-                    subdir: 'html'
-                }
-            }
-        },
+        coverageReporter: {
+            type : 'html',
+            dir : 'coverage/'
+        }
     });
 };
